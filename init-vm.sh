@@ -1,3 +1,6 @@
+# This comes from some Intel documentation.
+# https://software.intel.com/content/www/us/en/develop/articles/data-plane-development-kit-vhost-user-client-mode-with-open-vswitch.html
+
 # Start the VMs
 
 VMNAME=400-SVR1-Cent7-merged-v1.qcow2
