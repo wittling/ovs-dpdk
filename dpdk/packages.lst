@@ -1,0 +1,15 @@
+Removing:
+ dpdk                                  x86_64         18.11.5-1.el7_8         @extras                          4.8 M
+Removing for dependencies:
+ openstack-neutron                     noarch         1:12.1.1-1.el7          @centos-openstack-queens          67 k
+ openstack-neutron-common              noarch         1:12.1.1-1.el7          @centos-openstack-queens         1.2 M
+ openstack-neutron-linuxbridge         noarch         1:12.1.1-1.el7          @centos-openstack-queens          22 k
+ openstack-neutron-ml2                 noarch         1:12.1.1-1.el7          @centos-openstack-queens          28 k
+ openstack-neutron-openvswitch         noarch         1:12.1.1-1.el7          @centos-openstack-queens          25 k
+ openvswitch                           x86_64         1:2.11.0-4.el7          @centos-openstack-queens         5.6 M
+ python-neutron                        noarch         1:12.1.1-1.el7          @centos-openstack-queens         8.3 M
+ python-openvswitch                    x86_64         1:2.11.0-4.el7          @centos-openstack-queens         1.2 M
+ python2-ovsdbapp                      noarch         0.10.5-1.el7            @centos-openstack-queens         466 k
+ python2-ryu                           noarch         4.15-1.el7              @centos-openstack-queens          15 M
+
+
