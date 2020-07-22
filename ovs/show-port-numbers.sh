@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ovs-ofctl show br-testdpdk
+ovs-ofctl show $1

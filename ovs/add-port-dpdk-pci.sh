@@ -9,6 +9,7 @@ read PRT_TYP
 
 echo "name of port?: "
 read PRT_NAME 
+ovs-vsctl del-port $PRT_NAME
 
 echo "port number?: "
 read PRT_NUM

@@ -12,10 +12,6 @@
 #virtio-net-pci,mac=00:00:00:00:00:01,netdev=mynet1,mrg_rxbuf=off \
 #   -nographic
 
-#qemu-system-x86_64 -cpu host -enable-kvm -m 4096M -object memory-backend-file,id=mem,size=4096M,mem-path=/mnt/hugepages,share=on -numa node,memdev=mem -mem-prealloc  -drive file=${VMNAME} -chardev socket,id=char0,path=/tmp/sock0,server -netdev type=vhost-user,id=default,chardev=char0,vhostforce -device virtio-net-pci,mac=00:00:00:00:00:01,netdev=vhost0,mrg_rxbuf=off –nographic
-
-#qemu-kvm -cpu host -enable-kvm -m 4096M -object memory-backend-file,id=mem,size=4096M,mem-path=/mnt/hugepages,share=on -numa node,memdev=mem -mem-prealloc  -drive file=/opt/images/${VMNAME} -chardev socket,id=char0,path=/tmp/sock0,server -netdev type=vhost-user,id=default,chardev=char0,vhostforce -device virtio-net-pci,mac=00:00:00:00:00:01,netdev=vhost0,mrg_rxbuf=off –nographic
-
 echo "VM Name: "
 read VM_NAME
 export VM_NAME
@@ -37,7 +33,7 @@ ovs-vsctl show | grep Interface | grep vhost
 echo "enter ovs vhost port to attach vm to: "
 read VHOST_PORT
 
-echo $VHOST_PORT | grep vhostusr
+echo $VHOST_PORT | grep vhostusrclt
 if [ $? -eq 0 ]; then
    PORT_TYPE=vhost-user-client
 else
@@ -49,13 +45,14 @@ echo "PORT_TYPE: ${PORT_TYPE}"
 if [ $PORT_TYPE == "vhost-user" ]; then
    export VHOST_SOCK_DIR=/var/run/openvswitch
 
+# the vhostuser does not have the server parameter.
 /usr/libexec/qemu-kvm -name $VM_NAME -cpu host -enable-kvm \
   -m $GUEST_MEM -drive file=$QCOW2_IMAGE --nographic -snapshot \
-  -numa node,memdev=mem -mem-prealloc -smp sockets=1,cores=1 \
+  -numa node,memdev=mem -mem-prealloc -smp sockets=1,cores=2 \
   -object memory-backend-file,id=mem,size=$GUEST_MEM,mem-path=/dev/hugepages,share=on \
-  -chardev socket,id=char0,path=${VHOST_SOCK_DIR}/${VHOST_PORT} \
-  -netdev type=vhost-user,id=default,chardev=char0,vhostforce \
-  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off 
+  -chardev socket,id=char${MAC},path=${VHOST_SOCK_DIR}/${VHOST_PORT} \
+  -netdev type=vhost-user,id=default,chardev=char${MAC},vhostforce,queues=2 \
+  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off,mq=on,vectors=6
 
 else
 # vhost-user-client
@@ -70,16 +67,16 @@ export VHOST_SOCK_DIR="/var/run/openvswitch"
       echo "OVS-DPDK vhostuser server mode socket not found!"
       echo "${VHOST_SOCK_DIR}/${VHOST_PORT}.sock"
 #      exit 1
-   fi
+  fi
 
-      echo "Starting VM..."
+echo "Starting VM..."
 /usr/libexec/qemu-kvm -name $VM_NAME -cpu host -enable-kvm \
   -m $GUEST_MEM -drive file=$QCOW2_IMAGE --nographic -snapshot \
-  -numa node,memdev=mem -mem-prealloc -smp sockets=1,cores=1 \
+  -numa node,memdev=mem -mem-prealloc -smp sockets=1,cores=2 \
   -object memory-backend-file,id=mem,size=$GUEST_MEM,mem-path=/dev/hugepages,share=on \
-  -chardev socket,id=char1,path=/var/run/openvswitch/vhostusrclt1.sock,server \
-  -netdev type=vhost-user,id=default,chardev=char1,vhostforce \
-  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off
+  -chardev socket,id=char1,path=/var/run/openvswitch/${VHOST_PORT}.sock,server \
+  -netdev type=vhost-user,id=default,chardev=char1,vhostforce,queues=2 \
+  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off,mq=on,vectors=6
 
 #  -chardev socket,id=char1,path=/tmp/vhostusrclt1 \
 fi
