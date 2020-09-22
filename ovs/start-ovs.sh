@@ -1,3 +1,10 @@
+#!/bin/bash
+## This is a script to start OVS "by hand". 
+## It does a lot of things that are also in the init-ovs.sh script.
+## But this actually initializes a new OVS database, starts the server (by hand - not as a service).
+## So there is some redundancy and I WOULD NOT RECOMMEND RUNNING THIS unless you know for sure that
+## the OVS service in SystemD is NOT running, and you want a fresh database.
+## For this reason permissions on this will be r-r-r and not x-x-x.
 
 # Create the database
 ovsdb-tool create /usr/local/etc/openvswitch/conf.db /usr/local/share/openvswitch/vswitch.ovsschema

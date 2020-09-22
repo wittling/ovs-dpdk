@@ -40,9 +40,11 @@ else
    PORT_TYPE=vhost-user
 fi
 echo "PORT_TYPE: ${PORT_TYPE}"
+sleep 5
 
 
 if [ $PORT_TYPE == "vhost-user" ]; then
+# vhost-user - openvswitch binds to socket and acts as server
    export VHOST_SOCK_DIR=/var/run/openvswitch
 
 # the vhostuser does not have the server parameter.
@@ -52,11 +54,12 @@ if [ $PORT_TYPE == "vhost-user" ]; then
   -object memory-backend-file,id=mem,size=$GUEST_MEM,mem-path=/dev/hugepages,share=on \
   -chardev socket,id=char${MAC},path=${VHOST_SOCK_DIR}/${VHOST_PORT} \
   -netdev type=vhost-user,id=default,chardev=char${MAC},vhostforce,queues=2 \
-  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off,mq=on,vectors=6
+  -device virtio-net-pci,mac=00:00:00:00:00:0${MAC},netdev=default,mrg_rxbuf=off,mq=on,vectors=6 
+#1>qemu.kvm.vhostuser.out 2>&1
 
 else
-# vhost-user-client
-export VHOST_SOCK_DIR="/var/run/openvswitch"
+# vhost-user-client - qemu binds to socket and acts as server
+export VHOST_SOCK_DIR="/var/lib/libvirt/qemu/vhost_sockets"
 
    # If client mode make sure the OVS-DPDK created the server mode socket
    if [ -S "${VHOST_SOCK_DIR}/${VHOST_PORT}.sock" ]; then
