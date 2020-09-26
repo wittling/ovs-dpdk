@@ -43,3 +43,13 @@ ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="0xC"
 ovs-vsctl get Open_vSwitch . dpdk_initialized
 ovs-vswitchd --version
 ovs-vsctl get Open_vSwitch . dpdk_version
+
+# suppresses tons of OVS errors about not being able to connect to a controller
+ovs-vsctl set-fail-mode br-tun standalone
+
+# set datapath on specific bridges
+for br in br-tun
+do
+echo "Setting to $br to netdev (DPDK userspace) rather than system (kernel)"
+ovs-vsctl set bridge $br datapath_type=netdev
+done
