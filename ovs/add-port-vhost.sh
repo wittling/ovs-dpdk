@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ovs-vsctl show | grep Bridge
+#ovs-vsctl show | grep Bridge
+ovs-vsctl list-br
 echo "which bridge?: "
 read BRDG
 
@@ -27,8 +28,8 @@ fi
 # This one shows numbers AND names (and other stuff)
 ovs-ofctl show ${BRDG}
 # This one just shows names below.
-echo ""
 #ovs-vsctl list-ports br-tun
+echo ""
 echo "Enter port number for physical DPDK interface do you want to plumb your vhost port TO:"
 echo ""
 read DPDK_PCI_PORT

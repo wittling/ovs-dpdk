@@ -19,8 +19,8 @@ ovs-vsctl set Open_vSwitch . other_config:dpdk-init=true
 
 # calculating memory is MTU x PMD x RXQ 
 #ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0x2
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="4096"
-ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-limit="4096"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-mem="1024"
+ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-socket-limit="2048"
 
 # ring buffer same as memory pool.
 # shared memory means ports all use same ring buffer memory pool.
@@ -39,6 +39,10 @@ ovs-vsctl --no-wait set Open_vSwitch . other_config:dpdk-lcore-mask=0x2
 ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="0xC"
 #ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask=2
 
+# In some OVS versions the lcore mask must be set before OVS is initialized with DPDK.
+# The pmd mask can be changed on the fly hot - no restart required.
+ovs-vsctl set Open_vSwitch . other_config:dpdk-init=true
+
 # Notice these are GET commands - designed to show you that the settings above worked.
 ovs-vsctl get Open_vSwitch . dpdk_initialized
 ovs-vswitchd --version
@@ -48,8 +52,13 @@ ovs-vsctl get Open_vSwitch . dpdk_version
 ovs-vsctl set-fail-mode br-tun standalone
 
 # set datapath on specific bridges
-for br in br-tun
+for br in `ovs-vsctl list-br`
 do
-echo "Setting to $br to netdev (DPDK userspace) rather than system (kernel)"
-ovs-vsctl set bridge $br datapath_type=netdev
+   echo -c "Datapath for $br [system|netdev]: "
+   read dp
+   if [ $dp != "system" -o $dp != "netdev" ]; then
+      ovs-vsctl set bridge $br datapath_type=$dp
+   else
+      echo "unrecognized dp: using system"
+   fi
 done
