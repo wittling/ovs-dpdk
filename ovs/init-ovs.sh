@@ -50,6 +50,7 @@ ovs-vsctl get Open_vSwitch . dpdk_version
 
 # suppresses tons of OVS errors about not being able to connect to a controller
 ovs-vsctl set-fail-mode br-tun standalone
+ovs-vsctl set-fail-mode br-prv standalone
 
 # set datapath on specific bridges
 for br in `ovs-vsctl list-br`
