@@ -17,7 +17,9 @@ done
 #driverctl unset-override 0000:01:00.0
 #driverctl set-override 0000:01:00.0 vfio-pci
 #driverctl set-override 0000:01:00.0 uio_pci_generic
-echo "driverctl set-override ${pci} uio_pci_generic"
-driverctl set-override ${pci} uio_pci_generic
+echo -n "driver type: uio_pci_generic | vfio-pci"
+read drvtyp
+echo "driverctl set-override ${pci} $drvtyp"
+driverctl set-override ${pci} $drvtyp
 
 dpdk-devbind --status 

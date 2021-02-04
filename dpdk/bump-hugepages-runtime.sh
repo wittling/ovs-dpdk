@@ -1,3 +1,3 @@
 #!/bin/bash
 
-sysctl -w "vm.nr_hugepages=8"
+sysctl -w "vm.nr_hugepages=10"
