@@ -44,22 +44,29 @@ ovs-vsctl --no-wait set Open_vSwitch . other_config:pmd-cpu-mask="0xC"
 ovs-vsctl set Open_vSwitch . other_config:dpdk-init=true
 
 # Notice these are GET commands - designed to show you that the settings above worked.
-ovs-vsctl get Open_vSwitch . dpdk_initialized
 ovs-vswitchd --version
 ovs-vsctl get Open_vSwitch . dpdk_version
+result=`ovs-vsctl get Open_vSwitch . dpdk_initialized`
+if [ ${result} == "false" ]; then
+   echo "DPDK DID NOT INITIALIZE ON THIS OVS!!! CHECK LOGS"
+   echo "Exiting rc=1"
+   exit 1
+fi
 
 # suppresses tons of OVS errors about not being able to connect to a controller
-ovs-vsctl set-fail-mode br-tun standalone
-ovs-vsctl set-fail-mode br-prv standalone
+# OpenStack OpenVSwitch Agent is actually the controller when you run it!!!
+# ovs-vsctl set-fail-mode br-tun standalone
+# ovs-vsctl set-fail-mode br-prv standalone
 
 # set datapath on specific bridges
 for br in `ovs-vsctl list-br`
 do
-   echo -c "Datapath for $br [system|netdev]: "
+   echo -n "Datapath for $br [system|netdev]: "
    read dp
-   if [ $dp != "system" -o $dp != "netdev" ]; then
+   if [ $dp == "system" -o $dp == "netdev" ]; then
       ovs-vsctl set bridge $br datapath_type=$dp
    else
       echo "unrecognized dp: using system"
+      ovs-vsctl set bridge $br datapath_type=system
    fi
 done
